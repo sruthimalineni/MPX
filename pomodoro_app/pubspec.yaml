@@ -1,0 +1,21 @@
+name: pomodoro_mpv_demo
+description: Pomodoro MVVM demo (no Firebase)
+publish_to: "none"
+version: 0.0.1
+
+environment:
+  sdk: ">=2.18.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.0.5
+  shared_preferences: ^2.1.1
+  http: ^0.13.6
+  fl_chart: ^0.68.0
+  intl: ^0.18.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/tomato.png
