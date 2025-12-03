@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/task.dart';
 import '../../viewmodels/task_viewmodel.dart';
 
 class TaskListSheet extends StatefulWidget {
@@ -22,28 +23,40 @@ class _TaskListSheetState extends State<TaskListSheet> {
     super.dispose();
   }
 
-  void _showAddTaskDialog(BuildContext context) {
+  void _showTaskDialog(BuildContext context, {int? index, Task? existingTask}) {
+    if (existingTask != null) {
+      _nameController.text = existingTask.name;
+      _descController.text = existingTask.description;
+      _timeController.text = existingTask.minutes.toString();
+    } else {
+      _nameController.clear();
+      _descController.clear();
+      _timeController.clear();
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("New Task"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: "Task Name"),
-            ),
-            TextField(
-              controller: _descController,
-              decoration: const InputDecoration(labelText: "Description"),
-            ),
-            TextField(
-              controller: _timeController,
-              decoration: const InputDecoration(labelText: "Duration (minutes)"),
-              keyboardType: TextInputType.number,
-            ),
-          ],
+        title: Text(index == null ? "New Task" : "Edit Task"),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: "Task Name"),
+              ),
+              TextField(
+                controller: _descController,
+                decoration: const InputDecoration(labelText: "Description"),
+              ),
+              TextField(
+                controller: _timeController,
+                decoration: const InputDecoration(labelText: "Duration (minutes)"),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -53,18 +66,20 @@ class _TaskListSheetState extends State<TaskListSheet> {
           ElevatedButton(
             onPressed: () {
               if (_nameController.text.isNotEmpty && _timeController.text.isNotEmpty) {
-                context.read<TaskViewModel>().addTask(
-                      _nameController.text,
-                      _descController.text,
-                      int.tryParse(_timeController.text) ?? 20,
-                    );
-                _nameController.clear();
-                _descController.clear();
-                _timeController.clear();
+                final name = _nameController.text;
+                final desc = _descController.text;
+                final mins = int.tryParse(_timeController.text) ?? 20;
+
+                if (index != null) {
+                  context.read<TaskViewModel>().updateTask(index, name, desc, mins);
+                } else {
+                  context.read<TaskViewModel>().addTask(name, desc, mins);
+                }
+                
                 Navigator.pop(context);
               }
             },
-            child: const Text("Add"),
+            child: Text(index == null ? "Add" : "Save"),
           ),
         ],
       ),
@@ -80,7 +95,7 @@ class _TaskListSheetState extends State<TaskListSheet> {
       height: MediaQuery.of(context).size.height * 0.85,
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        color: Color(0xffFFF9D6), // Cream background
+        color: Color(0xffFFF9D6), 
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       child: Column(
@@ -103,7 +118,7 @@ class _TaskListSheetState extends State<TaskListSheet> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () => _showAddTaskDialog(context),
+              onPressed: () => _showTaskDialog(context),
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text("Add New Task", style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
@@ -122,69 +137,72 @@ class _TaskListSheetState extends State<TaskListSheet> {
               itemCount: tasks.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, i) {
-                return Dismissible(
-                  key: UniqueKey(),
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (_) {
-                    taskViewModel.removeTask(i);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Task removed')),
-                    );
-                  },
-                  background: Container(
-                    padding: const EdgeInsets.only(right: 20),
-                    alignment: Alignment.centerRight,
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.delete, color: Colors.white),
+                return Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 5,
+                        offset: const Offset(0, 2),
+                      )
+                    ],
                   ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
-                        )
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               tasks[i].name,
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                             ),
+                            if (tasks[i].description.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                tasks[i].description,
+                                style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                            const SizedBox(height: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
                                 color: const Color(0xffE0F7FA),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 "${tasks[i].minutes} min",
-                                style: const TextStyle(color: Color(0xff006064), fontSize: 12, fontWeight: FontWeight.bold),
+                                style: const TextStyle(color: Color(0xff006064), fontSize: 10, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
                         ),
-                        if (tasks[i].description.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            tasks[i].description,
-                            style: const TextStyle(color: Colors.grey, fontSize: 14),
+                      ),
+                      
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blueGrey),
+                            onPressed: () => _showTaskDialog(context, index: i, existingTask: tasks[i]),
+                            tooltip: 'Edit',
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Color(0xffFF6B6B)),
+                            onPressed: () {
+                              taskViewModel.removeTask(i);
+                            },
+                            tooltip: 'Delete',
                           ),
                         ],
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 );
               },

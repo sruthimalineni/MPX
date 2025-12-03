@@ -12,6 +12,13 @@ class TaskViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateTask(int index, String name, String description, int minutes) {
+    if (index >= 0 && index < tasks.length) {
+      tasks[index] = Task(name: name, description: description, minutes: minutes);
+      notifyListeners();
+    }
+  }
+
   void removeTask(int index) {
     tasks.removeAt(index);
     notifyListeners();
