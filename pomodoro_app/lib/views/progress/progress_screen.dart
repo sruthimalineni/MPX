@@ -52,7 +52,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               values: statsVM.monthlyTimeValues,
               xLabels: _monthLabels,
               lineColor: const Color(0xffE91E63),
-              fixedInterval: 30, // <--- SET 30 MIN INTERVAL
+              fixedInterval: 30,
             ),
             const SizedBox(height: 20),
             
@@ -61,7 +61,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               values: statsVM.monthlyTaskValues,
               xLabels: _monthLabels,
               lineColor: const Color(0xff2196F3),
-              fixedInterval: 2, // <--- SET 2 TASK INTERVAL
+              fixedInterval: 2, 
             ),
             const SizedBox(height: 40),
           ],

@@ -22,7 +22,6 @@ void main() {
     });
 
     test('Formatted time displays correctly', () {
-      // Test formatted getter
       timerViewModel.remainingSeconds = 1505; // 25:05
       expect(timerViewModel.formatted, equals('25:05'));
 
@@ -42,11 +41,9 @@ void main() {
       timerViewModel.currentTotalDuration = 1500;
       expect(timerViewModel.progressPercentage, equals(0.0));
 
-      // Half way through
       timerViewModel.remainingSeconds = 750;
       expect(timerViewModel.progressPercentage, equals(0.5));
 
-      // Completed
       timerViewModel.remainingSeconds = 0;
       expect(timerViewModel.progressPercentage, equals(1.0));
     });
@@ -58,7 +55,6 @@ void main() {
       
       expect(timerViewModel.isRunning, true);
       
-      // Clean up timer
       timerViewModel.stop();
     });
 
@@ -66,11 +62,9 @@ void main() {
       timerViewModel.start();
       expect(timerViewModel.isRunning, true);
       
-      // Calling start again should not change state
       timerViewModel.start();
       expect(timerViewModel.isRunning, true);
       
-      // Clean up timer
       timerViewModel.stop();
     });
 
@@ -94,7 +88,6 @@ void main() {
       timerViewModel.start();
       expect(timerViewModel.isRunning, true);
       
-      // Wait a bit
       await Future.delayed(const Duration(seconds: 1));
       
       timerViewModel.stop();
@@ -102,10 +95,8 @@ void main() {
       
       final secondsAfterStop = timerViewModel.remainingSeconds;
       
-      // Wait more time
       await Future.delayed(const Duration(seconds: 2));
       
-      // Verify timer is not counting down anymore
       expect(timerViewModel.remainingSeconds, equals(secondsAfterStop));
     });
 
@@ -116,10 +107,8 @@ void main() {
       
       timerViewModel.start();
       
-      // Wait for timer to complete (needs 2 ticks: one to go from 1->0, another to trigger completion)
       await Future.delayed(const Duration(milliseconds: 2500));
       
-      // Verify transition to break
       expect(timerViewModel.isBreak, true);
       expect(timerViewModel.remainingSeconds, equals(TimerViewModel.breakDuration));
       expect(timerViewModel.currentTotalDuration, equals(TimerViewModel.breakDuration));
@@ -134,10 +123,8 @@ void main() {
       
       timerViewModel.start();
       
-      // Wait for timer to complete (needs 2 ticks: one to go from 1->0, another to trigger completion)
       await Future.delayed(const Duration(milliseconds: 2500));
       
-      // Verify transition back to work
       expect(timerViewModel.isBreak, false);
       expect(timerViewModel.remainingSeconds, equals(TimerViewModel.workDuration));
       expect(timerViewModel.currentTotalDuration, equals(TimerViewModel.workDuration));
@@ -145,15 +132,12 @@ void main() {
     });
 
     test('Reset resets timer to initial state', () {
-      // Modify state
       timerViewModel.remainingSeconds = 500;
       timerViewModel.isBreak = true;
       timerViewModel.isRunning = true;
 
-      // Reset
       timerViewModel.reset();
 
-      // Verify reset state
       expect(timerViewModel.remainingSeconds, equals(25 * 60));
       expect(timerViewModel.isBreak, false);
       expect(timerViewModel.isRunning, false);
@@ -174,12 +158,10 @@ void main() {
       final secondsAfterReset = timerViewModel.remainingSeconds;
       await Future.delayed(const Duration(seconds: 1));
       
-      // Verify timer is not running
       expect(timerViewModel.remainingSeconds, equals(secondsAfterReset));
     });
 
     test('Work and break durations are correct', () {
-      // Verify constants
       expect(TimerViewModel.workDuration, equals(25 * 60)); // 1500 seconds
       expect(TimerViewModel.breakDuration, equals(5 * 60)); // 300 seconds
     });
@@ -200,38 +182,31 @@ void main() {
       
       timerViewModel.start();
       
-      // Wait for 2 seconds
       await Future.delayed(const Duration(seconds: 2));
       
       timerViewModel.stop();
       
-      // Progress should have increased
       expect(timerViewModel.progressPercentage, greaterThan(initialProgress));
       expect(timerViewModel.progressPercentage, lessThanOrEqualTo(1.0));
     });
 
     test('Multiple resets work correctly', () {
-      // First reset
       timerViewModel.remainingSeconds = 200;
       timerViewModel.reset();
       expect(timerViewModel.remainingSeconds, equals(25 * 60));
 
-      // Second reset
       timerViewModel.remainingSeconds = 100;
       timerViewModel.reset();
       expect(timerViewModel.remainingSeconds, equals(25 * 60));
     });
 
     test('Formatted time pads with zeros correctly', () {
-      // Single digit minutes and seconds
       timerViewModel.remainingSeconds = 65; // 1 minute 5 seconds
       expect(timerViewModel.formatted, equals('01:05'));
 
-      // Double digit values should not add extra padding
       timerViewModel.remainingSeconds = 605; // 10 minutes 5 seconds
       expect(timerViewModel.formatted, equals('10:05'));
 
-      // Large values
       timerViewModel.remainingSeconds = 5999; // 99 minutes 59 seconds
       expect(timerViewModel.formatted, equals('99:59'));
     });
@@ -246,17 +221,14 @@ void main() {
       
       await Future.delayed(const Duration(seconds: 1));
       
-      // Verify time didn't change while paused
       expect(timerViewModel.remainingSeconds, equals(pausedSeconds));
       
-      // Resume
       timerViewModel.start();
       
       await Future.delayed(const Duration(seconds: 1));
       
       timerViewModel.stop();
       
-      // Verify time decreased after resume
       expect(timerViewModel.remainingSeconds, lessThan(pausedSeconds));
     });
 
@@ -267,19 +239,16 @@ void main() {
         listenerCallCount++;
       });
       
-      // Start should notify
       timerViewModel.start();
       expect(listenerCallCount, greaterThan(0));
       
       final countAfterStart = listenerCallCount;
       
-      // Stop should notify
       timerViewModel.stop();
       expect(listenerCallCount, greaterThan(countAfterStart));
       
       final countAfterStop = listenerCallCount;
       
-      // Reset should notify
       timerViewModel.reset();
       expect(listenerCallCount, greaterThan(countAfterStop));
     });

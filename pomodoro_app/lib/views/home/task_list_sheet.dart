@@ -66,12 +66,10 @@ class _TaskListSheetState extends State<TaskListSheet> {
           ),
           ElevatedButton(
             onPressed: () {
-              // 1. Get Inputs
               final name = _nameController.text;
               final desc = _descController.text;
               final timeText = _timeController.text;
 
-              // 2. Validate Name
               if (name.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -82,12 +80,10 @@ class _TaskListSheetState extends State<TaskListSheet> {
                 return;
               }
 
-              // 3. Validate Time (The feature you asked for)
-              // tryParse returns null if the text is letters or empty
+
               final int? mins = int.tryParse(timeText);
 
               if (mins == null || mins <= 0) {
-                // Show Error and STOP (return) so the dialog doesn't close
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text("Time must be a valid number (e.g., 25)"),
@@ -98,7 +94,6 @@ class _TaskListSheetState extends State<TaskListSheet> {
                 return; 
               }
 
-              // 4. Save Task if validation passes
               if (index != null) {
                 context.read<TaskViewModel>().updateTask(index, name, desc, mins);
               } else {
@@ -171,7 +166,6 @@ class _TaskListSheetState extends State<TaskListSheet> {
                   key: Key(task.name + i.toString()),
                   direction: DismissDirection.horizontal, 
                   
-                  // Background for SWIPE LEFT (DELETE)
                   background: Container(
                     decoration: BoxDecoration(
                       color: const Color(0xff6BCB77), 
@@ -182,7 +176,6 @@ class _TaskListSheetState extends State<TaskListSheet> {
                     child: const Icon(Icons.check_circle, color: Colors.white, size: 28),
                   ),
 
-                  // Background for SWIPE RIGHT (COMPLETE)
                   secondaryBackground: Container(
                     decoration: BoxDecoration(
                       color: const Color(0xffFF6B6B), 

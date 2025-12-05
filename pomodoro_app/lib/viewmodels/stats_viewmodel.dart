@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import '../models/stats.dart';
-import '../services/firestore_service.dart'; // Import the new service
+import '../services/firestore_service.dart'; 
 
 class StatsViewModel extends ChangeNotifier {
   final FirestoreService _firestoreService = FirestoreService();
   
-  // The list accessed by your ProgressScreen
+  // The list accessed by ProgressScreen
   List<DailyStats> monthlyStats = []; 
 
   StatsViewModel() {
-    // Load data immediately upon creation
     fetchStats();
   }
 
   /// Records a session using the service, then refreshes local data
   Future<void> recordSession(int minutes) async {
     await _firestoreService.updateDailyStats(minutes);
-    await fetchStats(); // Reload to show the new numbers on the graph
+    await fetchStats(); 
   }
   
   /// Fetches data from the service and updates the UI
@@ -26,7 +25,6 @@ class StatsViewModel extends ChangeNotifier {
     notifyListeners();
   }
   
-  // --- Getters for your Charts (Aggregating data by month) ---
 
   List<double> get monthlyTimeValues {
     Map<int, double> monthMap = {};

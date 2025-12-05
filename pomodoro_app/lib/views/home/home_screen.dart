@@ -152,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       const SizedBox(height: 20),
 
-                      // --- BUTTONS SECTION ---
+                      
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -178,9 +178,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: const Text("Stop", style: TextStyle(color: Colors.white, fontSize: 18)),
                             ),
 
-                          const SizedBox(width: 20), // Spacing
+                          const SizedBox(width: 20), 
 
-                          // 2. Reset Button (Right Side)
+                          
                           ElevatedButton(
                             onPressed: timer.reset,
                             style: ElevatedButton.styleFrom(

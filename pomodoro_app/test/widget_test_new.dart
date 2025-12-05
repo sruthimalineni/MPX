@@ -80,7 +80,7 @@ void main() {
       expect(find.text('25:00'), findsOneWidget);
     });
 
-    // TEST 2: Multi-Provider Navigation Setup
+    // Test: Multi-Provider Navigation Setup
     testWidgets('Test 2: Navigation routes work with MultiProvider setup', (WidgetTester tester) async {
       await tester.pumpWidget(
         MultiProvider(
@@ -134,7 +134,7 @@ void main() {
       expect(find.byIcon(Icons.bar_chart_rounded), findsOneWidget);
     });
 
-    // TEST 3: Task ViewModel and Rounds Calculation
+    // Test: Task ViewModel and Rounds Calculation
     testWidgets('Test 3: Task management updates rounds left counter', (WidgetTester tester) async {
       final taskVM = TaskViewModel();
       final timerVM = TimerViewModel();

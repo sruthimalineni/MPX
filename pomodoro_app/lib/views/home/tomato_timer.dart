@@ -14,7 +14,7 @@ class TomatoTimer extends StatelessWidget {
     final Color bgColor = activeColor.withOpacity(0.2);
 
     return Column(
-      mainAxisSize: MainAxisSize.min, // Ensure column only takes needed space
+      mainAxisSize: MainAxisSize.min, 
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -26,7 +26,6 @@ class TomatoTimer extends StatelessWidget {
           child: Text(
             timer.isBreak ? "Break Time" : "Work Time",
             textAlign: TextAlign.center,
-            // Allow font scaling here, layout will adjust due to Column
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: activeColor),
           ),
         ),
@@ -52,13 +51,12 @@ class TomatoTimer extends StatelessWidget {
               },
             ),
             
-            // SCALING FIX: Constrain text to the circle size and use FittedBox
             SizedBox(
-              width: 180, // Slightly smaller than 220 to allow padding
+              width: 180, 
               height: 180,
               child: Center(
                 child: FittedBox(
-                  fit: BoxFit.contain, // Scale text down to fit if needed
+                  fit: BoxFit.contain, 
                   child: Text(
                     timer.formatted,
                     style: TextStyle(

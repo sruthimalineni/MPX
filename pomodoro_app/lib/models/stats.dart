@@ -22,10 +22,10 @@ class DailyStats {
     );
   }
 
-  // Method to convert DailyStats to a Map for Firestore
+  // Convert DailyStats to a Map for Firestore
   Map<String, dynamic> toFirestore() {
     return {
-      'date': Timestamp.fromDate(date), // Store as Timestamp for better sorting
+      'date': Timestamp.fromDate(date), 
       'minutes': minutes,
       'tasksCompleted': tasksCompleted,
     };

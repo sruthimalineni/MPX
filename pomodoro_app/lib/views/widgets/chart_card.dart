@@ -19,27 +19,21 @@ class ChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Find the highest data point
     double maxDataValue = 0;
     if (values.isNotEmpty) {
       maxDataValue = values.reduce((curr, next) => curr > next ? curr : next);
     }
 
-    // 2. Calculate maxY with extra spacing (Buffer)
     double maxY = maxDataValue;
     
     if (fixedInterval != null) {
       double interval = fixedInterval!;
       
-      // A: Snap to the nearest interval (e.g., 45 -> 60, 120 -> 120)
       double snappedMax = (maxDataValue / interval).ceil() * interval;
 
-      // B: Add 2 extra intervals of buffer (e.g., 120 becomes 180)
-      // This prevents the "cut off" look and follows your 120->180 example.
       maxY = snappedMax + (interval * 2);
       
     } else {
-       // Fallback percentage buffer if no interval is provided
        maxY = maxY * 1.5; 
        if (maxY == 0) maxY = 10;
     }
@@ -85,7 +79,6 @@ class ChartCard extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                // --- PART 1: THE FIXED Y-AXIS ---
                 SizedBox(
                   width: 30,
                   child: LineChart(
@@ -102,8 +95,7 @@ class ChartCard extends StatelessWidget {
                             reservedSize: 25,
                             interval: interval,
                             getTitlesWidget: (value, meta) {
-                              // Don't show the very top label if it matches maxY exactly
-                              // to avoid cutting off slightly
+
                               if (value > maxY) return const SizedBox.shrink();
                               return Text(
                                 value.toInt().toString(),
@@ -129,7 +121,6 @@ class ChartCard extends StatelessWidget {
                   ),
                 ),
 
-                // --- PART 2: THE SCROLLABLE DATA ---
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
@@ -191,7 +182,7 @@ class ChartCard extends StatelessWidget {
                                 enabled: true,
                                 touchTooltipData: LineTouchTooltipData(
                                   getTooltipColor: (touchedSpot) => Colors.blueGrey,
-                                  tooltipMargin: 10, // Adjusts distance from the point
+                                  tooltipMargin: 10, 
                                   getTooltipItems: (touchedSpots) {
                                     return touchedSpots.map((LineBarSpot touchedSpot) {
                                       return LineTooltipItem(
