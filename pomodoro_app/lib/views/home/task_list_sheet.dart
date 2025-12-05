@@ -137,72 +137,124 @@ class _TaskListSheetState extends State<TaskListSheet> {
               itemCount: tasks.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, i) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 5,
-                        offset: const Offset(0, 2),
-                      )
-                    ],
+                return Dismissible(
+                  key: Key(tasks[i].name + i.toString()),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xffFF6B6B),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    child: const Icon(Icons.delete, color: Colors.white, size: 28),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              tasks[i].name,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  confirmDismiss: (direction) async {
+                    return await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Delete Task'),
+                          content: Text('Are you sure you want to delete "${tasks[i].name}"?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('Cancel'),
                             ),
-                            if (tasks[i].description.isNotEmpty) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                tasks[i].description,
-                                style: const TextStyle(color: Colors.grey, fontSize: 12),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                            const SizedBox(height: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: const Color(0xffE0F7FA),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                "${tasks[i].minutes} min",
-                                style: const TextStyle(color: Color(0xff006064), fontSize: 10, fontWeight: FontWeight.bold),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text(
+                                'Delete',
+                                style: TextStyle(color: Color(0xffFF6B6B)),
                               ),
                             ),
                           ],
+                        );
+                      },
+                    ) ?? false;
+                  },
+                  onDismissed: (direction) {
+                    taskViewModel.removeTask(i);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${tasks[i].name} deleted'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () {
+                            // In a real app, you'd implement undo by storing the deleted item
+                          },
                         ),
                       ),
-                      
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blueGrey),
-                            onPressed: () => _showTaskDialog(context, index: i, existingTask: tasks[i]),
-                            tooltip: 'Edit',
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                tasks[i].name,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              if (tasks[i].description.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  tasks[i].description,
+                                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xffE0F7FA),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  "${tasks[i].minutes} min",
+                                  style: const TextStyle(color: Color(0xff006064), fontSize: 10, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Color(0xffFF6B6B)),
-                            onPressed: () {
-                              taskViewModel.removeTask(i);
-                            },
-                            tooltip: 'Delete',
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blueGrey),
+                              onPressed: () => _showTaskDialog(context, index: i, existingTask: tasks[i]),
+                              tooltip: 'Edit',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Color(0xffFF6B6B)),
+                              onPressed: () {
+                                taskViewModel.removeTask(i);
+                              },
+                              tooltip: 'Delete',
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
