@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:pomodoro_mpv_demo/services/date_api.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/timer_viewmodel.dart';
+import '../../viewmodels/task_viewmodel.dart';
 import 'task_list_sheet.dart';
 import 'tomato_timer.dart';
 
@@ -15,6 +16,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _currentDate = "Loading Date...";
+  int _roundsLeft = 0;
+  bool _timerListenerAttached = false;
+  bool _taskListenerAttached = false;
+  bool _prevIsBreak = false;
 
   @override
   void initState() {
@@ -39,9 +44,41 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  int _computeRoundsFromTasks(TaskViewModel taskVM) {
+    final totalMinutes = taskVM.tasks.fold<int>(0, (sum, t) => sum + t.minutes);
+    if (totalMinutes <= 0) return 0;
+    return (totalMinutes / 25).ceil();
+  }
+
   @override
   Widget build(BuildContext context) {
     final timer = Provider.of<TimerViewModel>(context);
+    final taskVM = Provider.of<TaskViewModel>(context);
+
+    // Attach listeners once when build runs and providers are available
+    if (!_timerListenerAttached) {
+      _timerListenerAttached = true;
+      timer.addListener(() {
+        // Detect transition from work -> break which indicates a completed round
+        if (!_prevIsBreak && timer.isBreak) {
+          setState(() {
+            if (_roundsLeft > 0) _roundsLeft -= 1;
+          });
+        }
+        _prevIsBreak = timer.isBreak;
+      });
+    }
+
+    if (!_taskListenerAttached) {
+      _taskListenerAttached = true;
+      taskVM.addListener(() {
+        setState(() {
+          _roundsLeft = _computeRoundsFromTasks(taskVM);
+        });
+      });
+      // initialize rounds from tasks
+      _roundsLeft = _computeRoundsFromTasks(taskVM);
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xffDFF8C8), // Light Green background
@@ -77,6 +114,31 @@ class _HomeScreenState extends State<HomeScreen> {
             const Spacer(),
             const TomatoTimer(),
             const SizedBox(height: 30),
+            // Rounds left indicator (visible only when > 0)
+            if (_roundsLeft > 0) ...[
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, 2)),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.timelapse, color: Color(0xff6BCB77)),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Rounds of Pomodoro left: $_roundsLeft',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

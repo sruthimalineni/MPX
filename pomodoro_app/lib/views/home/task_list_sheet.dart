@@ -137,9 +137,8 @@ class _TaskListSheetState extends State<TaskListSheet> {
               itemCount: tasks.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, i) {
-                // Wrap in Dismissible for Swipe-to-Delete
                 return Dismissible(
-                  key: UniqueKey(), // Use UniqueKey to ensure correct item is dismissed
+                  key: Key(tasks[i].name + i.toString()),
                   direction: DismissDirection.endToStart,
                   background: Container(
                     decoration: BoxDecoration(
@@ -150,12 +149,42 @@ class _TaskListSheetState extends State<TaskListSheet> {
                     padding: const EdgeInsets.only(right: 20),
                     child: const Icon(Icons.delete, color: Colors.white, size: 28),
                   ),
+                  confirmDismiss: (direction) async {
+                    return await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Delete Task'),
+                          content: Text('Are you sure you want to delete "${tasks[i].name}"?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text(
+                                'Delete',
+                                style: TextStyle(color: Color(0xffFF6B6B)),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ) ?? false;
+                  },
                   onDismissed: (direction) {
                     taskViewModel.removeTask(i);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('${tasks[i].name} deleted'),
                         duration: const Duration(seconds: 2),
+                        action: SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () {
+                            // In a real app, you'd implement undo by storing the deleted item
+                          },
+                        ),
                       ),
                     );
                   },
@@ -207,11 +236,16 @@ class _TaskListSheetState extends State<TaskListSheet> {
                           ),
                         ),
                         
-                        // Edit Button Only
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blueGrey),
-                          onPressed: () => _showTaskDialog(context, index: i, existingTask: tasks[i]),
-                          tooltip: 'Edit',
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blueGrey),
+                              onPressed: () => _showTaskDialog(context, index: i, existingTask: tasks[i]),
+                              tooltip: 'Edit',
+                            ),
+                            // Delete via swipe only; remove explicit delete button
+                          ],
                         ),
                       ],
                     ),
