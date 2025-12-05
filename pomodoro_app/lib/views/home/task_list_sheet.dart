@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/task.dart';
 import '../../viewmodels/task_viewmodel.dart';
+import '../../viewmodels/stats_viewmodel.dart'; // <-- New Import
 
 class TaskListSheet extends StatefulWidget {
   const TaskListSheet({super.key});
@@ -89,6 +90,7 @@ class _TaskListSheetState extends State<TaskListSheet> {
   @override
   Widget build(BuildContext context) {
     final taskViewModel = context.watch<TaskViewModel>();
+    final statsViewModel = context.read<StatsViewModel>(); // <-- Get Stats ViewModel
     final tasks = taskViewModel.tasks;
 
     return Container(
@@ -137,25 +139,67 @@ class _TaskListSheetState extends State<TaskListSheet> {
               itemCount: tasks.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, i) {
+                final task = tasks[i]; // Get the task at the current index
                 return Dismissible(
-                  key: Key(tasks[i].name + i.toString()),
-                  direction: DismissDirection.endToStart,
+                  key: Key(task.name + i.toString()),
+                  // Allow swiping both left (delete) and right (complete)
+                  direction: DismissDirection.horizontal, 
+                  
+                  // Background for SWIPE LEFT (End to Start - DELETE)
                   background: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xffFF6B6B),
+                      color: const Color(0xff6BCB77), // Green for completion
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.only(left: 20),
+                    child: const Icon(Icons.check_circle, color: Colors.white, size: 28),
+                  ),
+
+                  // Secondary Background for SWIPE RIGHT (Start to End - COMPLETE)
+                  secondaryBackground: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xffFF6B6B), // Red for deletion
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(right: 20),
                     child: const Icon(Icons.delete, color: Colors.white, size: 28),
                   ),
+
                   confirmDismiss: (direction) async {
+                    if (direction == DismissDirection.startToEnd) {
+                      // Confirmation for completion (optional, but good practice)
+                      return await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Task Completed'),
+                            content: Text('Mark "${task.name}" as completed and log ${task.minutes} minutes of work?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(true),
+                                child: const Text(
+                                  'Complete',
+                                  style: TextStyle(color: Color(0xff6BCB77)),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ) ?? false;
+                    }
+                    // Use existing confirmation for deletion (swipe left)
                     return await showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
                           title: const Text('Delete Task'),
-                          content: Text('Are you sure you want to delete "${tasks[i].name}"?'),
+                          content: Text('Are you sure you want to delete "${task.name}"?'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(false),
@@ -173,20 +217,47 @@ class _TaskListSheetState extends State<TaskListSheet> {
                       },
                     ) ?? false;
                   },
+                  
+                  // Main logic after confirmation
                   onDismissed: (direction) {
-                    taskViewModel.removeTask(i);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${tasks[i].name} deleted'),
-                        duration: const Duration(seconds: 2),
-                        action: SnackBarAction(
-                          label: 'Undo',
-                          onPressed: () {
-                            // In a real app, you'd implement undo by storing the deleted item
-                          },
+                    final dismissedTask = tasks[i];
+                    
+                    if (direction == DismissDirection.startToEnd) {
+                      // --- TASK COMPLETED (Swipe Right) ---
+                      
+                      // 1. Record the time to the Stats ViewModel
+                      statsViewModel.recordSession(dismissedTask.minutes);
+
+                      // 2. Remove the task from the Task ViewModel
+                      taskViewModel.removeTask(i);
+                      
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('✅ ${dismissedTask.name} completed! ${dismissedTask.minutes} mins logged.'),
+                          backgroundColor: const Color(0xff6BCB77),
+                          duration: const Duration(seconds: 3),
                         ),
-                      ),
-                    );
+                      );
+
+                    } else if (direction == DismissDirection.endToStart) {
+                      // --- TASK DELETED (Swipe Left) ---
+
+                      // 1. Remove the task from the Task ViewModel
+                      taskViewModel.removeTask(i);
+                      
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${dismissedTask.name} deleted'),
+                          duration: const Duration(seconds: 2),
+                          action: SnackBarAction(
+                            label: 'Undo',
+                            onPressed: () {
+                              // In a real app, you'd implement undo here
+                            },
+                          ),
+                        ),
+                      );
+                    }
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -208,13 +279,13 @@ class _TaskListSheetState extends State<TaskListSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                tasks[i].name,
+                                task.name,
                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                               ),
-                              if (tasks[i].description.isNotEmpty) ...[
+                              if (task.description.isNotEmpty) ...[
                                 const SizedBox(height: 4),
                                 Text(
-                                  tasks[i].description,
+                                  task.description,
                                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -228,7 +299,7 @@ class _TaskListSheetState extends State<TaskListSheet> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  "${tasks[i].minutes} min",
+                                  "${task.minutes} min",
                                   style: const TextStyle(color: Color(0xff006064), fontSize: 10, fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -241,10 +312,9 @@ class _TaskListSheetState extends State<TaskListSheet> {
                           children: [
                             IconButton(
                               icon: const Icon(Icons.edit, color: Colors.blueGrey),
-                              onPressed: () => _showTaskDialog(context, index: i, existingTask: tasks[i]),
+                              onPressed: () => _showTaskDialog(context, index: i, existingTask: task),
                               tooltip: 'Edit',
                             ),
-                            // Delete via swipe only; remove explicit delete button
                           ],
                         ),
                       ],

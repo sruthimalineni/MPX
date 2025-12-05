@@ -8,7 +8,7 @@ class ProgressScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stats = context.watch<StatsViewModel>().weeklyStats;
+    final stats = context.watch<StatsViewModel>().monthlyStats;
 
     return Scaffold(
       backgroundColor: const Color(0xffDFF8C8), // Light Green
