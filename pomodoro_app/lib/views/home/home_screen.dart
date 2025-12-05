@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:pomodoro_mpv_demo/services/date_api.dart';
+import 'package:pomodoro_mpv_demo/services/date_api.dart'; 
 import 'package:provider/provider.dart';
 import '../../viewmodels/timer_viewmodel.dart';
 import '../../viewmodels/task_viewmodel.dart';
@@ -80,15 +80,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xffDFF8C8),
       body: SafeArea(
-        // SCALING FIX 1: LayoutBuilder allows us to check screen height
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // SCALING FIX 2: SingleChildScrollView allows scrolling when text is huge
             return SingleChildScrollView(
               child: ConstrainedBox(
-                // Ensure the box is at least as tall as the screen
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                // SCALING FIX 3: IntrinsicHeight allows 'Spacer()' to work inside a ScrollView
                 child: IntrinsicHeight(
                   child: Column(
                     children: [
@@ -97,7 +93,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // SCALING FIX 4: Flexible allows text to wrap if it gets too wide
                             Flexible(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,11 +135,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min, // Shrink to fit content
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.timelapse, color: Color(0xffFF6B6B)),
                               const SizedBox(width: 8),
-                              // Flexible to handle text overflow
                               Flexible(
                                 child: Text(
                                   'Rounds of Pomodoro left: $_roundsLeft',
@@ -158,29 +152,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       const SizedBox(height: 20),
 
-                      // SCALING FIX 5: Wrap handles buttons if text is huge (they stack instead of overflow)
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 20, // Horizontal space
-                        runSpacing: 20, // Vertical space if they stack
+                      // --- BUTTONS SECTION ---
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          ElevatedButton(
-                            onPressed: timer.start,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xff6BCB77),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                          // 1. Start/Stop Button (Left Side)
+                          if (!timer.isRunning)
+                            ElevatedButton(
+                              onPressed: timer.start,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xff6BCB77),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                              ),
+                              child: const Text("Start", style: TextStyle(color: Colors.white, fontSize: 18)),
+                            )
+                          else
+                            ElevatedButton(
+                              onPressed: timer.stop,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xffFF6B6B),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                              ),
+                              child: const Text("Stop", style: TextStyle(color: Colors.white, fontSize: 18)),
                             ),
-                            child: const Text("Start", style: TextStyle(color: Colors.white, fontSize: 18)),
-                          ),
+
+                          const SizedBox(width: 20), // Spacing
+
+                          // 2. Reset Button (Right Side)
                           ElevatedButton(
-                            onPressed: timer.stop,
+                            onPressed: timer.reset,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xffFF6B6B),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                              backgroundColor: Color(0xffFFF9D6),
+                              shape: const CircleBorder(),
+                              padding: const EdgeInsets.all(16),
+                              elevation: 4,
                             ),
-                            child: const Text("Stop", style: TextStyle(color: Colors.white, fontSize: 18)),
+                            child: const Icon(Icons.refresh, color: Colors.black, size: 28),
                           ),
                         ],
                       ),
@@ -203,7 +212,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           child: Center(
                             child: Container(
-                              // Limit width so it doesn't look stretched on tablets
                               constraints: const BoxConstraints(maxWidth: 300),
                               width: 200,
                               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),

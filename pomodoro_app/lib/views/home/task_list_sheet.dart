@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/task.dart';
 import '../../viewmodels/task_viewmodel.dart';
-import '../../viewmodels/stats_viewmodel.dart'; // <-- New Import
+import '../../viewmodels/stats_viewmodel.dart';
 
 class TaskListSheet extends StatefulWidget {
   const TaskListSheet({super.key});
@@ -37,7 +37,7 @@ class _TaskListSheetState extends State<TaskListSheet> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(index == null ? "New Task" : "Edit Task"),
         content: SingleChildScrollView(
           child: Column(
@@ -54,31 +54,58 @@ class _TaskListSheetState extends State<TaskListSheet> {
               TextField(
                 controller: _timeController,
                 decoration: const InputDecoration(labelText: "Duration (minutes)"),
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.number, // Helps mobile users see numpad
               ),
             ],
           ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text("Cancel"),
           ),
           ElevatedButton(
             onPressed: () {
-              if (_nameController.text.isNotEmpty && _timeController.text.isNotEmpty) {
-                final name = _nameController.text;
-                final desc = _descController.text;
-                final mins = int.tryParse(_timeController.text) ?? 20;
+              // 1. Get Inputs
+              final name = _nameController.text;
+              final desc = _descController.text;
+              final timeText = _timeController.text;
 
-                if (index != null) {
-                  context.read<TaskViewModel>().updateTask(index, name, desc, mins);
-                } else {
-                  context.read<TaskViewModel>().addTask(name, desc, mins);
-                }
-                
-                Navigator.pop(context);
+              // 2. Validate Name
+              if (name.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Please enter a task name"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
               }
+
+              // 3. Validate Time (The feature you asked for)
+              // tryParse returns null if the text is letters or empty
+              final int? mins = int.tryParse(timeText);
+
+              if (mins == null || mins <= 0) {
+                // Show Error and STOP (return) so the dialog doesn't close
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Time must be a valid number (e.g., 25)"),
+                    backgroundColor: Colors.red,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+                return; 
+              }
+
+              // 4. Save Task if validation passes
+              if (index != null) {
+                context.read<TaskViewModel>().updateTask(index, name, desc, mins);
+              } else {
+                context.read<TaskViewModel>().addTask(name, desc, mins);
+              }
+              
+              Navigator.pop(dialogContext);
             },
             child: Text(index == null ? "Add" : "Save"),
           ),
@@ -90,7 +117,7 @@ class _TaskListSheetState extends State<TaskListSheet> {
   @override
   Widget build(BuildContext context) {
     final taskViewModel = context.watch<TaskViewModel>();
-    final statsViewModel = context.read<StatsViewModel>(); // <-- Get Stats ViewModel
+    final statsViewModel = context.read<StatsViewModel>();
     final tasks = taskViewModel.tasks;
 
     return Container(
@@ -139,16 +166,15 @@ class _TaskListSheetState extends State<TaskListSheet> {
               itemCount: tasks.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, i) {
-                final task = tasks[i]; // Get the task at the current index
+                final task = tasks[i];
                 return Dismissible(
                   key: Key(task.name + i.toString()),
-                  // Allow swiping both left (delete) and right (complete)
                   direction: DismissDirection.horizontal, 
                   
-                  // Background for SWIPE LEFT (End to Start - DELETE)
+                  // Background for SWIPE LEFT (DELETE)
                   background: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xff6BCB77), // Green for completion
+                      color: const Color(0xff6BCB77), 
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.centerLeft,
@@ -156,10 +182,10 @@ class _TaskListSheetState extends State<TaskListSheet> {
                     child: const Icon(Icons.check_circle, color: Colors.white, size: 28),
                   ),
 
-                  // Secondary Background for SWIPE RIGHT (Start to End - COMPLETE)
+                  // Background for SWIPE RIGHT (COMPLETE)
                   secondaryBackground: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xffFF6B6B), // Red for deletion
+                      color: const Color(0xffFF6B6B), 
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.centerRight,
@@ -169,7 +195,6 @@ class _TaskListSheetState extends State<TaskListSheet> {
 
                   confirmDismiss: (direction) async {
                     if (direction == DismissDirection.startToEnd) {
-                      // Confirmation for completion (optional, but good practice)
                       return await showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -183,17 +208,13 @@ class _TaskListSheetState extends State<TaskListSheet> {
                               ),
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(true),
-                                child: const Text(
-                                  'Complete',
-                                  style: TextStyle(color: Color(0xff6BCB77)),
-                                ),
+                                child: const Text('Complete', style: TextStyle(color: Color(0xff6BCB77))),
                               ),
                             ],
                           );
                         },
                       ) ?? false;
                     }
-                    // Use existing confirmation for deletion (swipe left)
                     return await showDialog(
                       context: context,
                       builder: (BuildContext context) {
@@ -207,10 +228,7 @@ class _TaskListSheetState extends State<TaskListSheet> {
                             ),
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(true),
-                              child: const Text(
-                                'Delete',
-                                style: TextStyle(color: Color(0xffFF6B6B)),
-                              ),
+                              child: const Text('Delete', style: TextStyle(color: Color(0xffFF6B6B))),
                             ),
                           ],
                         );
@@ -218,17 +236,11 @@ class _TaskListSheetState extends State<TaskListSheet> {
                     ) ?? false;
                   },
                   
-                  // Main logic after confirmation
                   onDismissed: (direction) {
                     final dismissedTask = tasks[i];
                     
                     if (direction == DismissDirection.startToEnd) {
-                      // --- TASK COMPLETED (Swipe Right) ---
-                      
-                      // 1. Record the time to the Stats ViewModel
                       statsViewModel.recordSession(dismissedTask.minutes);
-
-                      // 2. Remove the task from the Task ViewModel
                       taskViewModel.removeTask(i);
                       
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -240,21 +252,11 @@ class _TaskListSheetState extends State<TaskListSheet> {
                       );
 
                     } else if (direction == DismissDirection.endToStart) {
-                      // --- TASK DELETED (Swipe Left) ---
-
-                      // 1. Remove the task from the Task ViewModel
                       taskViewModel.removeTask(i);
-                      
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('${dismissedTask.name} deleted'),
                           duration: const Duration(seconds: 2),
-                          action: SnackBarAction(
-                            label: 'Undo',
-                            onPressed: () {
-                              // In a real app, you'd implement undo here
-                            },
-                          ),
                         ),
                       );
                     }

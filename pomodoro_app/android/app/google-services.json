@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "846165027136",
+    "project_id": "pomodoro-12b45",
+    "storage_bucket": "pomodoro-12b45.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:846165027136:android:2f21966a06a0d0c9ecf2a5",
+        "android_client_info": {
+          "package_name": "com.example.pomodoroMpvDemo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvnX43amDYvBWfQh_OmhiI4J9yiq7IZNY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:846165027136:android:7133d8115d879796ecf2a5",
+        "android_client_info": {
+          "package_name": "com.example.pomodoro_mpv_demo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvnX43amDYvBWfQh_OmhiI4J9yiq7IZNY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
