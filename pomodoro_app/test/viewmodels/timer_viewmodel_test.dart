@@ -51,6 +51,99 @@ void main() {
       expect(timerViewModel.progressPercentage, equals(1.0));
     });
 
+    test('Start method sets isRunning to true', () {
+      expect(timerViewModel.isRunning, false);
+      
+      timerViewModel.start();
+      
+      expect(timerViewModel.isRunning, true);
+      
+      // Clean up timer
+      timerViewModel.stop();
+    });
+
+    test('Start method is idempotent (multiple calls do not cause issues)', () {
+      timerViewModel.start();
+      expect(timerViewModel.isRunning, true);
+      
+      // Calling start again should not change state
+      timerViewModel.start();
+      expect(timerViewModel.isRunning, true);
+      
+      // Clean up timer
+      timerViewModel.stop();
+    });
+
+    test('Timer counts down correctly', () async {
+      final initialSeconds = timerViewModel.remainingSeconds;
+      
+      timerViewModel.start();
+      
+      // Wait for 3 seconds to pass
+      await Future.delayed(const Duration(seconds: 3));
+      
+      // Stop the timer
+      timerViewModel.stop();
+      
+      // Verify that time has decreased (should be around 3 seconds less)
+      expect(timerViewModel.remainingSeconds, lessThan(initialSeconds));
+      expect(timerViewModel.remainingSeconds, greaterThanOrEqualTo(initialSeconds - 4));
+    });
+
+    test('Stop stops the timer and countdown', () async {
+      timerViewModel.start();
+      expect(timerViewModel.isRunning, true);
+      
+      // Wait a bit
+      await Future.delayed(const Duration(seconds: 1));
+      
+      timerViewModel.stop();
+      expect(timerViewModel.isRunning, false);
+      
+      final secondsAfterStop = timerViewModel.remainingSeconds;
+      
+      // Wait more time
+      await Future.delayed(const Duration(seconds: 2));
+      
+      // Verify timer is not counting down anymore
+      expect(timerViewModel.remainingSeconds, equals(secondsAfterStop));
+    });
+
+    test('Timer transitions to break when work session completes', () async {
+      // Set remaining seconds to a small value for quick testing
+      timerViewModel.remainingSeconds = 1;
+      timerViewModel.currentTotalDuration = 1;
+      
+      timerViewModel.start();
+      
+      // Wait for timer to complete (needs 2 ticks: one to go from 1->0, another to trigger completion)
+      await Future.delayed(const Duration(milliseconds: 2500));
+      
+      // Verify transition to break
+      expect(timerViewModel.isBreak, true);
+      expect(timerViewModel.remainingSeconds, equals(TimerViewModel.breakDuration));
+      expect(timerViewModel.currentTotalDuration, equals(TimerViewModel.breakDuration));
+      expect(timerViewModel.isRunning, false);
+    });
+
+    test('Timer transitions back to work when break completes', () async {
+      // Start in break mode with small remaining time
+      timerViewModel.isBreak = true;
+      timerViewModel.remainingSeconds = 1;
+      timerViewModel.currentTotalDuration = TimerViewModel.breakDuration;
+      
+      timerViewModel.start();
+      
+      // Wait for timer to complete (needs 2 ticks: one to go from 1->0, another to trigger completion)
+      await Future.delayed(const Duration(milliseconds: 2500));
+      
+      // Verify transition back to work
+      expect(timerViewModel.isBreak, false);
+      expect(timerViewModel.remainingSeconds, equals(TimerViewModel.workDuration));
+      expect(timerViewModel.currentTotalDuration, equals(TimerViewModel.workDuration));
+      expect(timerViewModel.isRunning, false);
+    });
+
     test('Reset resets timer to initial state', () {
       // Modify state
       timerViewModel.remainingSeconds = 500;
@@ -67,13 +160,22 @@ void main() {
       expect(timerViewModel.currentTotalDuration, equals(25 * 60));
     });
 
-    test('Stop stops the timer', () {
-      timerViewModel.isRunning = true;
-      timerViewModel.remainingSeconds = 1000;
-
-      timerViewModel.stop();
-
+    test('Reset stops a running timer', () async {
+      timerViewModel.start();
+      expect(timerViewModel.isRunning, true);
+      
+      await Future.delayed(const Duration(seconds: 1));
+      
+      timerViewModel.reset();
+      
       expect(timerViewModel.isRunning, false);
+      expect(timerViewModel.remainingSeconds, equals(TimerViewModel.workDuration));
+      
+      final secondsAfterReset = timerViewModel.remainingSeconds;
+      await Future.delayed(const Duration(seconds: 1));
+      
+      // Verify timer is not running
+      expect(timerViewModel.remainingSeconds, equals(secondsAfterReset));
     });
 
     test('Work and break durations are correct', () {
@@ -87,6 +189,25 @@ void main() {
       timerViewModel.remainingSeconds = 0;
 
       expect(timerViewModel.progressPercentage, equals(1.0));
+    });
+
+    test('Progress percentage updates during countdown', () async {
+      timerViewModel.remainingSeconds = 10;
+      timerViewModel.currentTotalDuration = 10;
+      
+      final initialProgress = timerViewModel.progressPercentage;
+      expect(initialProgress, equals(0.0));
+      
+      timerViewModel.start();
+      
+      // Wait for 2 seconds
+      await Future.delayed(const Duration(seconds: 2));
+      
+      timerViewModel.stop();
+      
+      // Progress should have increased
+      expect(timerViewModel.progressPercentage, greaterThan(initialProgress));
+      expect(timerViewModel.progressPercentage, lessThanOrEqualTo(1.0));
     });
 
     test('Multiple resets work correctly', () {
@@ -113,6 +234,54 @@ void main() {
       // Large values
       timerViewModel.remainingSeconds = 5999; // 99 minutes 59 seconds
       expect(timerViewModel.formatted, equals('99:59'));
+    });
+
+    test('Timer can be paused and resumed', () async {
+      timerViewModel.start();
+      
+      await Future.delayed(const Duration(seconds: 1));
+      
+      timerViewModel.stop();
+      final pausedSeconds = timerViewModel.remainingSeconds;
+      
+      await Future.delayed(const Duration(seconds: 1));
+      
+      // Verify time didn't change while paused
+      expect(timerViewModel.remainingSeconds, equals(pausedSeconds));
+      
+      // Resume
+      timerViewModel.start();
+      
+      await Future.delayed(const Duration(seconds: 1));
+      
+      timerViewModel.stop();
+      
+      // Verify time decreased after resume
+      expect(timerViewModel.remainingSeconds, lessThan(pausedSeconds));
+    });
+
+    test('notifyListeners is called appropriately', () {
+      var listenerCallCount = 0;
+      
+      timerViewModel.addListener(() {
+        listenerCallCount++;
+      });
+      
+      // Start should notify
+      timerViewModel.start();
+      expect(listenerCallCount, greaterThan(0));
+      
+      final countAfterStart = listenerCallCount;
+      
+      // Stop should notify
+      timerViewModel.stop();
+      expect(listenerCallCount, greaterThan(countAfterStart));
+      
+      final countAfterStop = listenerCallCount;
+      
+      // Reset should notify
+      timerViewModel.reset();
+      expect(listenerCallCount, greaterThan(countAfterStop));
     });
   });
 }
