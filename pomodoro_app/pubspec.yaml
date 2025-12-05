@@ -18,8 +18,22 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
 
 flutter:
   uses-material-design: true
   assets:
     - assets/tomato.png
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/tomato.png" 
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#DFF8C8"
+  image: assets/tomato.png
+  android: true
+  ios: true

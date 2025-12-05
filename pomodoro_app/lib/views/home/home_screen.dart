@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Color(0xffFFF9D6),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, 2)),
@@ -129,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.timelapse, color: Color(0xff6BCB77)),
+                    const Icon(Icons.timelapse, color: const Color(0xffFF6B6B)),
                     const SizedBox(width: 8),
                     Text(
                       'Rounds of Pomodoro left: $_roundsLeft',
