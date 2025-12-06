@@ -60,25 +60,39 @@ State management is handled by the Provider package, ensuring clean separation o
 
 ## Project Structure
 lib/
-
-├── models/          # Data models 
-
-├── services/        # Firebase, Date API services
-
-├── viewmodels/      # Business logic (Timer, Task, Stats ViewModels)
-
-├── views/           # UI screens and widgets
-
-│   ├── home/        # Main timer screen
-
-│   ├── progress/    # Statistics screen
-
-│   └── widgets/     # Reusable UI components
-
-├── theme/           # App theming
-
-└── app.dart         # App configuration and routing
-
+│
+├── models/
+│ ├── stats.dart
+│ └── task.dart
+│
+├── services/
+│ ├── date_api.dart
+│ ├── firebase_options.dart
+│ └── firestore_service.dart
+│
+├── theme/
+│ └── app_theme.dart
+│
+├── viewmodels/
+│ ├── stats_viewmodel.dart
+│ ├── task_viewmodel.dart
+│ └── timer_viewmodel.dart
+│
+├── views/
+│ ├── home/
+│ │ ├── home_screen.dart
+│ │ ├── task_list_sheet.dart
+│ │ └── tomato_timer.dart
+│ │
+│ ├── progress/
+│ │ └── progress_screen.dart
+│ │
+│ └── widgets/
+│ ├── chart_card.dart
+│ └── timer_painter.dart
+│
+├── app.dart
+└── main.dart
 
 ## Setup Instructions
 
