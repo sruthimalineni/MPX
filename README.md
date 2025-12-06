@@ -62,37 +62,38 @@ State management is handled by the Provider package, ensuring clean separation o
 lib/
 │
 ├── models/
-│ ├── stats.dart
-│ └── task.dart
+│   ├── stats.dart
+│   └── task.dart
 │
 ├── services/
-│ ├── date_api.dart
-│ ├── firebase_options.dart
-│ └── firestore_service.dart
+│   ├── date_api.dart
+│   ├── firebase_options.dart
+│   └── firestore_service.dart
 │
 ├── theme/
-│ └── app_theme.dart
+│   └── app_theme.dart
 │
 ├── viewmodels/
-│ ├── stats_viewmodel.dart
-│ ├── task_viewmodel.dart
-│ └── timer_viewmodel.dart
+│   ├── stats_viewmodel.dart
+│   ├── task_viewmodel.dart
+│   └── timer_viewmodel.dart
 │
 ├── views/
-│ ├── home/
-│ │ ├── home_screen.dart
-│ │ ├── task_list_sheet.dart
-│ │ └── tomato_timer.dart
-│ │
-│ ├── progress/
-│ │ └── progress_screen.dart
-│ │
-│ └── widgets/
-│ ├── chart_card.dart
-│ └── timer_painter.dart
+│   ├── home/
+│   │   ├── home_screen.dart
+│   │   ├── task_list_sheet.dart
+│   │   └── tomato_timer.dart
+│   │
+│   ├── progress/
+│   │   └── progress_screen.dart
+│   │
+│   └── widgets/
+│       ├── chart_card.dart
+│       └── timer_painter.dart
 │
 ├── app.dart
 └── main.dart
+
 
 ## Setup Instructions
 
