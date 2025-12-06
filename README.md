@@ -60,14 +60,23 @@ State management is handled by the Provider package, ensuring clean separation o
 
 ## Project Structure
 lib/
+
 ├── models/          # Data models 
+
 ├── services/        # Firebase, Date API services
+
 ├── viewmodels/      # Business logic (Timer, Task, Stats ViewModels)
+
 ├── views/           # UI screens and widgets
+
 │   ├── home/        # Main timer screen
+
 │   ├── progress/    # Statistics screen
+
 │   └── widgets/     # Reusable UI components
+
 ├── theme/           # App theming
+
 └── app.dart         # App configuration and routing
 
 
