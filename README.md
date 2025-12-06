@@ -1,6 +1,11 @@
 # Pomodoro Timer App 
 
-A modern Pomodoro timer application built with Flutter that helps you maintain focus and productivity using the Pomodoro Technique. The app features task management, progress tracking, and beautiful Material Design UI.
+Our Pomodoro App is a timer application built from Flutter that helps users maintain focus and productivity by studying in increments of twenty-five minutes and taking five minute interval breaks. This app also features a task list where users can input designated amounts of tasks and the time it takes to complete each task. From there, the app takes the time and sections off how many rounds of pomodoro need to be completed for all tasks to be done. In addition, to ensure users know how long they have been studying, there is a statistics page that tracks all both the total time they have completed a task each month and how many tasks were completed.
+
+## Special Topics
+- Users can swipe left and right on a task in task lists to mark as complete or delete tasks.
+- Our timer is animated by an increased clockwise motion that tracks how many minutes it has been.
+- Leaving the statistics page, users can swipe right to return back to the home screen.
 
 ## Features
 
@@ -30,6 +35,17 @@ A modern Pomodoro timer application built with Flutter that helps you maintain f
 - Clean material design interface
 - Responsive layout for different screen sizes
 - Smooth animations and transitions
+
+## Architecture
+
+The app follows the MVVM (Model-View-ViewModel) architectural pattern:
+
+- **Models**: Represent data structures (Task, Stats)
+- **ViewModels**: Contain business logic and state management
+- **Views**: Handle UI rendering and user interactions
+- **Services**: Manage external dependencies (Firebase, APIs)
+
+State management is handled by the Provider package, ensuring clean separation of concerns and reactive UI updates.
 
 ## Tech Stack
 
@@ -123,33 +139,8 @@ flutter build web --release
 - **Stop**: Pause the current session
 - **Reset**: Return to initial state
 
-## Architecture
-
-The app follows the MVVM (Model-View-ViewModel) architectural pattern:
-
-- **Models**: Represent data structures (Task, Stats)
-- **ViewModels**: Contain business logic and state management
-- **Views**: Handle UI rendering and user interactions
-- **Services**: Manage external dependencies (Firebase, APIs)
-
-State management is handled by the Provider package, ensuring clean separation of concerns and reactive UI updates.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch 
-3. Commit your changes 
-4. Push to the branch 
-5. Open a Pull Request
 
 ## Testing
 
 Run the test suite:
 flutter test
-
-## Acknowledgments
-
-- Pomodoro Technique by Francesco Cirillo
-- Flutter framework for cross-platform development
-- Firebase for backend services
-- FL Chart for data visualization
