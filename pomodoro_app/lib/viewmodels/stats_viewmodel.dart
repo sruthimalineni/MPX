@@ -5,20 +5,17 @@ import '../services/firestore_service.dart';
 class StatsViewModel extends ChangeNotifier {
   final FirestoreService _firestoreService = FirestoreService();
   
-  // The list accessed by ProgressScreen
   List<DailyStats> monthlyStats = []; 
 
   StatsViewModel() {
     fetchStats();
   }
 
-  /// Records a session using the service, then refreshes local data
   Future<void> recordSession(int minutes) async {
     await _firestoreService.updateDailyStats(minutes);
     await fetchStats(); 
   }
   
-  /// Fetches data from the service and updates the UI
   Future<void> fetchStats() async {
     final stats = await _firestoreService.fetchAllStats();
     monthlyStats = stats;

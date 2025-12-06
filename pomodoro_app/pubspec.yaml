@@ -1,5 +1,5 @@
 name: pomodoro_mpv_demo
-description: Pomodoro MVVM demo (no Firebase)
+description: Pomodoro App
 publish_to: "none"
 version: 0.0.1
 

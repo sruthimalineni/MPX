@@ -54,7 +54,7 @@ class _TaskListSheetState extends State<TaskListSheet> {
               TextField(
                 controller: _timeController,
                 decoration: const InputDecoration(labelText: "Duration (minutes)"),
-                keyboardType: TextInputType.number, // Helps mobile users see numpad
+                keyboardType: TextInputType.number,
               ),
             ],
           ),

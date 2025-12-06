@@ -7,7 +7,6 @@ class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String collectionPath = 'daily_stats';
 
-  /// Fetch all stats, sorted by date (newest first)
   Future<List<DailyStats>> fetchAllStats() async {
     try {
       final snapshot = await _db

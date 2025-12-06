@@ -2,11 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class TimerPainter extends CustomPainter {
-  // The progress 
   final double percentage;
-  // The color of the progress 
   final Color taskColor;
-  // The faint background circle color
   final Color backgroundColor;
 
   TimerPainter({
@@ -33,7 +30,6 @@ class TimerPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round 
       ..style = PaintingStyle.stroke;
 
-    // Calculate the sweep angle based on percentage
     double sweepAngle = 2 * pi * percentage;
 
     canvas.drawArc(
