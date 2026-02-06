@@ -9,7 +9,7 @@ Our Pomodoro App is a timer application built from Flutter that helps users main
 
 ## Features
 
-### 🍅 Pomodoro Timer
+### 🍅 Pomodoro Timer 🍅
 - 25-minute work sessions with 5-minute breaks
 <img width="390" height="798" alt="image" src="https://github.com/user-attachments/assets/1c624b2c-c5f2-41dd-a752-99ea884c783d" />
 <img width="395" height="798" alt="image" src="https://github.com/user-attachments/assets/958271d0-a8c9-4a8b-9c75-90aede3b48c9" />
